@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerNinja : MonoBehaviour
 
@@ -11,10 +12,11 @@ public class PlayerNinja : MonoBehaviour
     private Rigidbody2D rb;
     public float fuerzaSalto = 10f;
 
-   
 
+    [HideInInspector] public bool usingLadder = false;
     private Transform tr;
-    
+
+    public Text puntajetext;
 
     private SpriteRenderer sr;
     private const int Animacion_Quieto = 1;
@@ -22,17 +24,26 @@ public class PlayerNinja : MonoBehaviour
     private const int Animacion_Correr = 3;
     private const int Animacion_Morir = 4;
     private const int Animacion_Disparar = 5;
+    private const int Animacion_SubirEscalera = 6;
+    private const int Animacion_Planear = 7;
+    private const int Animacion_Deslizarse = 8;
+
+    private bool trepar = false;
+    private bool EstadoGanar = false;
+    private bool Caminar = false;
 
     private int EstadoSalto = 0;
-    private bool EstadoGanar = false;
     private bool EstadoSaltoDoble = false;
-    private bool Caminar = false;
+    
 
     public bool EstadoMuerte = false;
     
     public Transform kunaiTransform;
     public GameObject kunai;
 
+    public int vidas = 3;
+    public int puntaje = 0;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -45,12 +56,17 @@ public class PlayerNinja : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        puntajetext.text = "Puntaje: " + puntaje + " Vida: " + vidas;
+
         if (EstadoGanar == false)
         {
 
 
             if (EstadoMuerte == false)
             {
+                Debug.Log(rb.velocity.y);
+                Caida();
+                Muerte();
                 if (Input.GetKey(KeyCode.RightArrow))
                 {
                     MovimientoDerecha();
@@ -69,10 +85,36 @@ public class PlayerNinja : MonoBehaviour
                     Instantiate(kunai, kunaiTransform.position, Quaternion.identity);
       
                 }
+               
+                else if (trepar && Input.GetKey(KeyCode.A)  )
+                {
+                    rb.gravityScale = 0;
+                    rb.velocity = new Vector2(rb.velocity.x,0);
+                    animator.SetInteger("Estado",Animacion_SubirEscalera);
+                    if (Input.GetKey(KeyCode.UpArrow))
+                    {
+                        rb.velocity=new Vector2(rb.velocity.x,velocidadCaminar);
+                    }
+                    if (Input.GetKey(KeyCode.DownArrow))
+                    {
+                        rb.velocity=new Vector2(rb.velocity.x,-velocidadCaminar);
+                    }                    
+                    //CambiarAnimacion(Animacion_Disparar); 
+      
+                }
+                else if (Input.GetKey(KeyCode.Z) )
+                {
+                    Planear();
+                }
+                else if (Input.GetKey(KeyCode.C) )
+                {
+                   CambiarAnimacion(Animacion_Deslizarse);
+                }
 
                 else
                 {
                     EstarQuieto();
+                    Debug.Log("Quieto");
                 }
             }
             else
@@ -95,12 +137,13 @@ public class PlayerNinja : MonoBehaviour
 
     private void Saltar()
     {
+     //   rb.velocity = new Vector2(rb.velocity.x, 0);
+    
         rb.velocity = Vector2.up * fuerzaSalto;
         CambiarAnimacion(Animacion_Saltar);
         EstadoSalto++;
         if (EstadoSalto == 2)
         {
-            Debug.Log("xxxx");
             EstadoSaltoDoble = true;
         }
     }
@@ -127,6 +170,13 @@ public class PlayerNinja : MonoBehaviour
         {
             Saltar();
         }
+
+      /*Escalera
+       if (!usingLadder)
+        {
+             CambiarAnimacion(Animacion_SubirEscalera);
+             rb.velocity = new Vector2(0, rb.velocity.y);
+        }*/
     }
 
     private void EstarQuieto()
@@ -134,12 +184,59 @@ public class PlayerNinja : MonoBehaviour
         rb.velocity = new Vector2(0, rb.velocity.y);
         CambiarAnimacion(Animacion_Quieto);
     }
+    private void Caida()
+    {
+        if (rb.velocity.y<-147)
+        {
+            EstadoMuerte = true;
+            vidas = 0;
+        }
+    }
+    
+    private void Planear()
+    {
+        if (rb.velocity.y<-20)
+        {
+            if (Input.GetKey(KeyCode.Z))
+            {
+                rb.velocity = new Vector2(rb.velocity.x, -30);
+                CambiarAnimacion(Animacion_Planear);
+            }
+        }
+    }
 
+    public void Muerte()
+    {
+        if (vidas==0)
+        {
+            EstadoMuerte = true;
+            
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "ladder")
+        {
+            trepar = false;
+            rb.gravityScale = 25;
+            CambiarAnimacion(Animacion_Quieto);
+        }
+       
+    }
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "ladder")
+        {
+            trepar = true;
+            
+        }
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Muerte")
         {
-            EstadoMuerte = true;
+            vidas = vidas - 1;
+           // EstadoMuerte = true;
         }
 
         if (collision.gameObject.tag == "Suelo")
@@ -154,6 +251,7 @@ public class PlayerNinja : MonoBehaviour
             Destroy(collision.gameObject);
             EstadoGanar = true;
         }
+        
     }
     
 }

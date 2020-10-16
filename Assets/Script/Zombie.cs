@@ -20,7 +20,7 @@ public class Zombie : MonoBehaviour
     private int puntaje = 0;
     private Animator animator;
     private BoxCollider2D bx;
-    
+    public GameObject ninja;
     
 
     // Start is called before the first frame update
@@ -30,6 +30,7 @@ public class Zombie : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         bx = GetComponent<BoxCollider2D>();
+        ninja = GameObject.Find("Ninja");
     }
 
     // Update is called once per frame
@@ -81,6 +82,14 @@ public class Zombie : MonoBehaviour
                 muerte = true;
             }
         }
+        if(collision.gameObject.tag == "Bala")
+        {
+            ninja.GetComponent<PlayerNinja>().puntaje = ninja.GetComponent<PlayerNinja>().puntaje+10;
+            muerte = true;
+            Destroy(collision.gameObject);
+            bx.enabled = false;
+        }
+
     }
     private void CambiarAnimacion(int animation)
     {

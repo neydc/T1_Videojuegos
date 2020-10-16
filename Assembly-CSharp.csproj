@@ -55,6 +55,8 @@
      <Compile Include="Assets\Script\ZombieSIguiendo.cs" />
      <Compile Include="Assets\Script\Zombie.cs" />
      <Compile Include="Assets\Script\CamaraSeguimiento.cs" />
+     <Compile Include="Assets\Script\Escalera.cs" />
+     <Compile Include="Assets\Script\InstanciaZombie.cs" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>D:/Unity Projects/ExamenT1_VD/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>

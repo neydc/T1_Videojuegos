@@ -12,6 +12,7 @@ TagManager:
   - Calabaza
   - Bala
   - Ninja
+  - ladder
   layers:
   - Default
   - TransparentFX
